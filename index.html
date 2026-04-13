@@ -107,6 +107,10 @@
     .ads-grid { grid-template-columns: 1fr; }
     .table-head, .appliance-row { grid-template-columns: 1fr 80px 80px 28px; }
   }
+  .tooltip-wrap { position: relative; display: inline; cursor: help; border-bottom: 1px dashed var(--gray-400); }
+  .tooltip-box { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--gray-900); color: #fff; font-size: 11px; line-height: 1.6; padding: 8px 10px; border-radius: 8px; width: 200px; z-index: 100; pointer-events: none; }
+  .tooltip-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--gray-900); }
+  .tooltip-wrap:hover .tooltip-box { display: block; }
 </style>
 </head>
 <body>
@@ -185,15 +189,65 @@
       <div class="cov-note">Basado en HSP media española de 4,5 h/día y rendimiento del sistema del 80%.</div>
       <div class="breakdown" id="r-breakdown"></div>
     </div>
-    <div class="card" style="margin-bottom:0;">
-      <div class="ads-header"><span class="ads-title">Instaladores en tu zona</span><span class="ads-badge">Publicidad</span></div>
-      <div class="ads-grid">
-        <div class="ad-card"><div class="ad-logo" style="background:var(--green-light);">☀</div><div class="ad-name">SolarMed Sur</div><div class="ad-zone">Valencia · Murcia · Alicante</div><button class="ad-btn" onclick="alert('Enlace a instalador')">Solicitar presupuesto →</button></div>
-        <div class="ad-card"><div class="ad-logo" style="background:var(--blue-light);">⚡</div><div class="ad-name">EnerSolar Pro</div><div class="ad-zone">Instalación nacional</div><button class="ad-btn" onclick="alert('Enlace a instalador')">Solicitar presupuesto →</button></div>
-        <div class="ad-card"><div class="ad-logo" style="background:#FEF3C7;">🔋</div><div class="ad-name">GreenWatt</div><div class="ad-zone">Levante · Cataluña</div><button class="ad-btn" onclick="alert('Enlace a instalador')">Solicitar presupuesto →</button></div>
+<div class="card" style="margin-bottom:0;">
+      <div class="ads-header">
+        <span class="ads-title">¿Con quién instalas?</span>
+        <span class="ads-badge">Enlace de referido · tú también te llevas descuento</span>
       </div>
-      <div class="ads-disclaimer">Anunciantes ficticios. En producción se integraría una plataforma de instaladores reales.</div>
+      <p style="font-size:12px;color:var(--gray-400);margin-bottom:12px;">Precios orientativos para una instalación media de 5–7 kWp sin batería. El precio real depende de tu tejado, ubicación y consumo.</p>
+      <div class="ads-grid">
+        <div class="ad-card">
+          <div class="ad-logo" style="background:#FEF9C3;font-size:22px;">🌞</div>
+          <div class="ad-name">Holaluz</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Cobertura nacional</div>
+          <div style="font-size:12px;color:var(--gray-700);line-height:1.7;margin-bottom:10px;text-align:left;">
+            <div>💶 <strong>Compra:</strong> ~5.000–8.000€</div>
+            <div>📅 <strong><span class="tooltip-wrap">Cuotas<span class="tooltip-box">Financiación: los paneles son tuyos desde el día 1. Pagas a plazos con intereses, como un préstamo. Al terminar, son 100% tuyos y puedes pedir subvenciones.</span></span>:</strong> desde ~60€/mes</div>
+            <div>⭐ <strong>Trustpilot:</strong> 4.1 / 5</div>
+            <div style="margin-top:6px;padding:6px 8px;background:var(--green-light);border-radius:6px;font-size:11px;color:var(--green-dark);">🎁 Tú y quien contrata recibís <strong>200€</strong> con referido</div>
+          </div>
+          <a class="ad-btn" href="https://www.holaluz.com" target="_blank" rel="nofollow noopener" style="display:block;text-decoration:none;text-align:center;">Pedir presupuesto →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-logo" style="background:#DBEAFE;font-size:22px;">⚡</div>
+          <div class="ad-name">Otovo</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Cobertura nacional</div>
+          <div style="font-size:12px;color:var(--gray-700);line-height:1.7;margin-bottom:10px;text-align:left;">
+            <div>💶 <strong>Compra:</strong> ~4.500–7.500€</div>
+            <div>🏠 <strong><span class="tooltip-wrap">Alquiler<span class="tooltip-box">Los paneles son de Otovo durante 20 años. Tú pagas una cuota mensual y ellos se encargan del mantenimiento. A los 20 años te los regalan. Ojo: en total pagas ~2.4x el precio y no puedes pedir ciertas subvenciones.</span></span>:</strong> desde ~25€/mes</div>
+            <div>⭐ <strong>Trustpilot:</strong> 3.0 / 5</div>
+            <div style="margin-top:6px;padding:6px 8px;background:var(--green-light);border-radius:6px;font-size:11px;color:var(--green-dark);">🎁 Tú y quien contrata recibís <strong>250€</strong> con referido</div>
+          </div>
+          <a class="ad-btn" href="https://www.otovo.es" target="_blank" rel="nofollow noopener" style="display:block;text-decoration:none;text-align:center;">Pedir presupuesto →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-logo" style="background:#DBEAFE;font-size:22px;">⚡</div>
+          <div class="ad-name">Otovo</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Cobertura nacional · Compra</div>
+          <div style="font-size:12px;color:var(--gray-700);line-height:1.7;margin-bottom:10px;text-align:left;">
+            <div>💶 <strong>Compra:</strong> ~4.500–7.500€</div>
+            <div>💳 <strong>Financiación:</strong> desde ~50€/mes</div>
+            <div>⭐ <strong>Trustpilot:</strong> 3.0 / 5</div>
+            <div style="margin-top:6px;padding:6px 8px;background:var(--green-light);border-radius:6px;font-size:11px;color:var(--green-dark);">🎁 Tú y quien contrata recibís <strong>250€</strong> con referido</div>
+          </div>
+          <a class="ad-btn" href="https://www.otovo.es" target="_blank" rel="nofollow noopener" style="display:block;text-decoration:none;text-align:center;">Pedir presupuesto →</a>
+        </div>
+      </div>
+      <div class="ads-disclaimer" style="margin-top:10px;">Precios orientativos 2026 para ~5–7 kWp sin batería. Los enlaces de Holaluz y Otovo son referidos — si contratas, ambas partes recibís el descuento indicado. Valoraciones de Trustpilot.</div>
+      <div style="margin-top:16px;border-top:1px solid var(--gray-100);padding-top:14px;">
+        <p style="font-size:12px;color:var(--gray-400);margin-bottom:10px;">¿Quieres empezar pequeño? Kits solares con batería en Amazon</p>
+        <div style="background:var(--gray-50);border:1px dashed var(--gray-200);border-radius:8px;height:90px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:12px;color:var(--gray-400);">[ Banner Amazon afiliado — pendiente de ID ]</span>
+        </div>
+        <p style="font-size:10px;color:var(--gray-400);margin-top:6px;">Enlace de afiliado · Si compras, recibimos una pequeña comisión sin coste para ti.</p>
+      </div>
     </div>
+  </div>
+  <div style="max-width:760px;margin:0 auto 2rem;padding:0 1.5rem;">
+    <p style="font-size:11px;color:var(--gray-400);text-align:center;line-height:1.8;">
+      ¿Eres instalador o empresa del sector solar y quieres aparecer en esta calculadora?
+      <a href="mailto:hola@cuantasplacasnecesito.es" style="color:var(--gray-600);text-decoration:underline;">Escríbenos a hola@cuantasplacasnecesito.es</a>
+    </p>
   </div>
 </main>
 <script>
