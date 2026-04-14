@@ -127,7 +127,102 @@
       <div class="card-icon" style="background:var(--green-light);">⚡</div>
       <div><div class="card-title">Electrodomésticos y aparatos</div><div class="card-subtitle">Ajusta las horas de uso diarias y la potencia de cada aparato</div></div>
     </div>
-    <div class="table-head"><span>Aparato</span><span>Horas/día</span><span>Vatios (W)</span><span></span></div>
+    <div style="margin-bottom:1rem;">
+    <label style="font-size:12px;color:var(--gray-600);font-weight:500;display:block;margin-bottom:6px;">📍 Provincia</label>
+    <select id="provincia" onchange="updateHSP()" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:8px 10px;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50);color:var(--gray-900);outline:none;">
+      <option value="4.5">— Selecciona tu provincia —</option>
+      <optgroup label="Andalucía">
+        <option value="5.5">Almería</option>
+        <option value="5.3">Cádiz</option>
+        <option value="5.2">Córdoba</option>
+        <option value="5.0">Granada</option>
+        <option value="5.1">Huelva</option>
+        <option value="5.0">Jaén</option>
+        <option value="5.2">Málaga</option>
+        <option value="5.3">Sevilla</option>
+      </optgroup>
+      <optgroup label="Aragón">
+        <option value="4.7">Huesca</option>
+        <option value="4.8">Teruel</option>
+        <option value="4.8">Zaragoza</option>
+      </optgroup>
+      <optgroup label="Asturias">
+        <option value="3.3">Asturias</option>
+      </optgroup>
+      <optgroup label="Baleares">
+        <option value="5.0">Baleares</option>
+      </optgroup>
+      <optgroup label="Canarias">
+        <option value="5.6">Las Palmas</option>
+        <option value="5.4">Santa Cruz de Tenerife</option>
+      </optgroup>
+      <optgroup label="Cantabria">
+        <option value="3.4">Cantabria</option>
+      </optgroup>
+      <optgroup label="Castilla-La Mancha">
+        <option value="4.9">Albacete</option>
+        <option value="4.9">Ciudad Real</option>
+        <option value="4.8">Cuenca</option>
+        <option value="4.8">Guadalajara</option>
+        <option value="4.9">Toledo</option>
+      </optgroup>
+      <optgroup label="Castilla y León">
+        <option value="4.4">Ávila</option>
+        <option value="4.3">Burgos</option>
+        <option value="4.4">León</option>
+        <option value="4.5">Palencia</option>
+        <option value="4.6">Salamanca</option>
+        <option value="4.3">Segovia</option>
+        <option value="4.6">Soria</option>
+        <option value="4.6">Valladolid</option>
+        <option value="4.4">Zamora</option>
+      </optgroup>
+      <optgroup label="Cataluña">
+        <option value="4.6">Barcelona</option>
+        <option value="4.7">Girona</option>
+        <option value="4.7">Lleida</option>
+        <option value="4.8">Tarragona</option>
+      </optgroup>
+      <optgroup label="Comunidad Valenciana">
+        <option value="5.0">Alicante</option>
+        <option value="4.9">Castellón</option>
+        <option value="4.9">Valencia</option>
+      </optgroup>
+      <optgroup label="Extremadura">
+        <option value="5.2">Badajoz</option>
+        <option value="5.1">Cáceres</option>
+      </optgroup>
+      <optgroup label="Galicia">
+        <option value="3.5">A Coruña</option>
+        <option value="3.6">Lugo</option>
+        <option value="3.6">Ourense</option>
+        <option value="3.7">Pontevedra</option>
+      </optgroup>
+      <optgroup label="La Rioja">
+        <option value="4.5">La Rioja</option>
+      </optgroup>
+      <optgroup label="Madrid">
+        <option value="4.8">Madrid</option>
+      </optgroup>
+      <optgroup label="Murcia">
+        <option value="5.3">Murcia</option>
+      </optgroup>
+      <optgroup label="Navarra">
+        <option value="4.2">Navarra</option>
+      </optgroup>
+      <optgroup label="País Vasco">
+        <option value="3.5">Álava</option>
+        <option value="3.3">Guipúzcoa</option>
+        <option value="3.4">Vizcaya</option>
+      </optgroup>
+      <optgroup label="Ceuta y Melilla">
+        <option value="5.2">Ceuta</option>
+        <option value="5.3">Melilla</option>
+      </optgroup>
+    </select>
+    <p id="hsp-info" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></p>
+  </div>
+  <div class="table-head"><span>Aparato</span><span>Horas/día</span><span>Vatios (W)</span><span></span></div>
     <div id="appliances-list"></div>
     <button class="add-row-btn" onclick="addAppliance()">+ Añadir aparato</button>
   <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);">
@@ -145,7 +240,7 @@
     </div>
     <div class="toggle-wrap" onclick="toggleEV()">
       <button class="toggle" id="ev-toggle" type="button"></button>
-      <span class="toggle-label" id="ev-label">No tengo / no cargo en casa</span>
+      <span class="toggle-label" id="ev-label">No tengo/no cargo en casa</span>
     </div>
     <div id="ev-fields">
       <div class="ev-grid">
@@ -192,7 +287,14 @@
     <div class="coverage-wrap">
       <div class="cov-header"><span class="cov-title">Cobertura solar estimada</span><span class="cov-pct" id="r-cover">—%</span></div>
       <div class="bar-track"><div class="bar-fill" id="r-bar" style="width:0%"></div></div>
-      <div class="cov-note">Basado en HSP media española de 4,5 h/día y rendimiento del sistema del 80%.</div>
+      <div class="cov-note" style="line-height:1.8;">
+  <strong style="color:var(--gray-600);">¿Cómo se calcula?</strong><br>
+  Se usan paneles de <strong>450 Wp</strong> (~2 m² cada uno), que es el estándar residencial actual. 
+  La fórmula es: <em>kWh/día ÷ (HSP × rendimiento) × 1000 ÷ 450 Wp</em>.<br>
+  · <strong>HSP <span id="hsp-method">4,5</span> h/día</strong> — horas de sol pico para tu provincia (varía: ~3,3 h en el norte, ~5,6 h en el sur).<br>
+  · <strong>Rendimiento 80%</strong> — pérdidas reales del sistema: inversor (~5%), cableado (~2%), temperatura (~5%), suciedad (~3%) y sombreado (~5%).<br>
+  · El resultado es orientativo. Una instalación real la dimensiona un técnico según tu ubicación exacta, orientación del tejado e inclinación.
+</div>
       <div class="breakdown" id="r-breakdown"></div>
     </div>
 <div class="card" style="margin-bottom:0;">
@@ -208,7 +310,7 @@
           <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Cobertura nacional</div>
           <div style="font-size:12px;color:var(--gray-700);line-height:1.7;margin-bottom:10px;text-align:left;">
             <div>💶 <strong>Compra:</strong> ~5.000–8.000€</div>
-            <div>📅 <strong><span class="tooltip-wrap">Cuotas<span class="tooltip-box">Financiación: los paneles son tuyos desde el día 1. Pagas a plazos con intereses, como un préstamo. Al terminar, son 100% tuyos y puedes pedir subvenciones.</span></span>:</strong> desde ~60€/mes</div>
+            <div>💳 <strong><span class="tooltip-wrap">Financiación<span class="tooltip-box">Los paneles son tuyos desde el día 1. Pagas a plazos con intereses, como un préstamo. Al terminar, son 100% tuyos y puedes pedir subvenciones.</span></span>:</strong> desde ~60€/mes</div>
             <div>⭐ <strong>Trustpilot:</strong> 4.1 / 5</div>
             <div style="margin-top:6px;padding:6px 8px;background:var(--green-light);border-radius:6px;font-size:11px;color:var(--green-dark);">🎁 Tú y quien contrata recibís <strong>200€</strong> con referido</div>
           </div>
@@ -249,7 +351,7 @@
       </div>
     </div>
   </div>
-  <div style="max-width:760px;margin:0 auto 2rem;padding:0 1.5rem;">
+  <div style="max-width:760px;margin:2rem auto 2rem;padding:0 1.5rem;">
     <p style="font-size:11px;color:var(--gray-400);text-align:center;line-height:1.8;">
       ¿Eres instalador o empresa del sector solar y quieres aparecer en esta calculadora?
       <a href="mailto:hola@cuantasplacasnecesito.es" style="color:var(--gray-600);text-decoration:underline;">Escríbenos a hola@cuantasplacasnecesito.es</a>
@@ -279,13 +381,47 @@ function renderAppliances(){
     list.appendChild(row);
   });
 }
-function addAppliance(){appliances.push({name:"Nuevo aparato",watts:100,hours:2});renderAppliances();}
-function removeAppliance(i){appliances.splice(i,1);renderAppliances();}
+function addAppliance(){appliances.push({name:"Nuevo aparato",watts:100,hours:2});function updateHSP(){
+  const sel=document.getElementById('provincia');
+  const hsp=+sel.value||4.5;
+  const name=sel.options[sel.selectedIndex].text;
+  const info=document.getElementById('hsp-info');
+  const display=document.getElementById('hsp-display');
+  const method=document.getElementById('hsp-method');
+  if(sel.selectedIndex>0){
+    info.textContent=`HSP para ${name}: ${hsp} h/día`;
+    if(display)display.innerHTML=`HSP de ${hsp} h/día (${name})`;
+    if(method)method.textContent=hsp;
+  } else {
+    info.textContent='';
+    if(display)display.innerHTML='HSP media española de 4,5 h/día';
+    if(method)method.textContent='4,5';
+  }
+}
+renderAppliances();}
+function removeAppliance(i){appliances.splice(i,1);function updateHSP(){
+  const sel=document.getElementById('provincia');
+  const hsp=+sel.value||4.5;
+  const name=sel.options[sel.selectedIndex].text;
+  const info=document.getElementById('hsp-info');
+  const display=document.getElementById('hsp-display');
+  const method=document.getElementById('hsp-method');
+  if(sel.selectedIndex>0){
+    info.textContent=`HSP para ${name}: ${hsp} h/día`;
+    if(display)display.innerHTML=`HSP de ${hsp} h/día (${name})`;
+    if(method)method.textContent=hsp;
+  } else {
+    info.textContent='';
+    if(display)display.innerHTML='HSP media española de 4,5 h/día';
+    if(method)method.textContent='4,5';
+  }
+}
+renderAppliances();}
 
 function toggleEV(){
   evOn=!evOn;
   document.getElementById('ev-toggle').classList.toggle('on',evOn);
-  document.getElementById('ev-label').textContent=evOn?'Sí, cargo en casa':'No tengo / no cargo en casa';
+  document.getElementById('ev-label').textContent=evOn?'Sí, cargo en casa':'No tengo/no cargo en casa';
   document.getElementById('ev-fields').style.display=evOn?'block':'none';
   if(evOn)recalcEV();
 }
@@ -399,7 +535,7 @@ function calcular(){
   const appKwh=appliances.reduce((s,a)=>s+(a.watts*a.hours)/1000,0);
   const evKwh=getEVDailyKwh();
   const totalKwh=(invoiceKwh&&invoiceKwh>appKwh?invoiceKwh:appKwh)+evKwh;
-  const HSP=4.5,eff=0.80,panelWp=450;
+  const HSP=+document.getElementById("provincia").value||4.5,eff=0.80,panelWp=450;
   const panelsNeeded=Math.ceil((totalKwh/(HSP*eff))*1000/panelWp);
 
   // Roof limit
@@ -438,6 +574,23 @@ function calcular(){
   const results=document.getElementById('results');
   results.style.display='block';
   setTimeout(()=>results.scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+function updateHSP(){
+  const sel=document.getElementById('provincia');
+  const hsp=+sel.value||4.5;
+  const name=sel.options[sel.selectedIndex].text;
+  const info=document.getElementById('hsp-info');
+  const display=document.getElementById('hsp-display');
+  const method=document.getElementById('hsp-method');
+  if(sel.selectedIndex>0){
+    info.textContent=`HSP para ${name}: ${hsp} h/día`;
+    if(display)display.innerHTML=`HSP de ${hsp} h/día (${name})`;
+    if(method)method.textContent=hsp;
+  } else {
+    info.textContent='';
+    if(display)display.innerHTML='HSP media española de 4,5 h/día';
+    if(method)method.textContent='4,5';
+  }
 }
 renderAppliances();
 </script>
