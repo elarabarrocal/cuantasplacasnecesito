@@ -265,6 +265,17 @@
         <button class="ctab active" id="ctab-full" onclick="setCharge('full')">Carga completa cada X días</button>
         <button class="ctab" id="ctab-partial" onclick="setCharge('partial')">Según km recorridos</button>
       </div>
+
+      <div style="font-size:12px;color:var(--gray-600);font-weight:500;margin-bottom:6px;">¿Cuándo cargas?</div>
+      <div class="charge-tabs">
+        <button class="ctab" id="ctab-day" onclick="setChargeTime('day')">De día</button>
+        <button class="ctab active" id="ctab-night" onclick="setChargeTime('night')">De noche</button>
+      </div>
+
+      <div class="charge-tabs">
+        <button class="ctab active" id="ctab-full" onclick="setCharge('full')">Carga completa cada X días</button>
+        <button class="ctab" id="ctab-partial" onclick="setCharge('partial')">Según km recorridos</button>
+      </div>
       <div class="info-box" id="ev-info"></div>
       <div class="warn-box" id="ev-warn"></div>
     </div>
@@ -421,7 +432,7 @@ const DEFAULT_APPLIANCES = [
 ];
 let appliances = DEFAULT_APPLIANCES.map(a=>({...a}));
 const DAY_RATIO = 0.35;
-let evOn=false, chargeMode='full', invoiceKwh=null;
+let evOn=false, chargeMode='full', chargeTime='night', invoiceKwh=null;
 
 function renderAppliances(){
   const list=document.getElementById('appliances-list');
@@ -480,6 +491,12 @@ function toggleEV(){
   document.getElementById('ev-fields').style.display=evOn?'block':'none';
   if(evOn)recalcEV();
 }
+function setChargeTime(mode){
+  chargeTime=mode;
+  document.getElementById('ctab-day').classList.toggle('active',mode==='day');
+  document.getElementById('ctab-night').classList.toggle('active',mode==='night');
+}
+
 function setCharge(mode){
   chargeMode=mode;
   document.getElementById('ctab-full').classList.toggle('active',mode==='full');
@@ -605,6 +622,10 @@ function getEVDailyKwh(){
 function calcular(){
   const appKwh=appliances.reduce((s,a)=>s+(a.watts*a.hours)/1000,0);
   const evKwh=getEVDailyKwh();
+
+let evDay=0, evNight=0;
+if(chargeTime==='day') evDay=evKwh;
+else evNight=evKwh;
   const totalKwh=(invoiceKwh&&invoiceKwh>appKwh?invoiceKwh:appKwh)+evKwh;
   const HSP=+document.getElementById("provincia").value||4.5,eff=0.80,panelWp=+document.getElementById("panel-wp").value||450;
   
@@ -612,12 +633,16 @@ const mode = document.querySelector('input[name="mode"]:checked').value;
 
 let targetKwh;
 
+// cálculo correcto usando consumo diurno real (incluye EV bien)
+let baseDayUse = totalKwh * DAY_RATIO;
+let realDayUse = baseDayUse + evDay;
+
 if (mode === "full") {
   targetKwh = totalKwh;
 } else if (mode === "day") {
-  targetKwh = totalKwh * DAY_RATIO;
+  targetKwh = realDayUse;
 } else if (mode === "roi") {
-  targetKwh = totalKwh * DAY_RATIO * 0.7;
+  targetKwh = realDayUse * 0.7;
 }
 
 const panelsNeeded = Math.ceil((targetKwh/(HSP*eff))*1000/panelWp);
@@ -641,7 +666,8 @@ const panelsNeeded = Math.ceil((targetKwh/(HSP*eff))*1000/panelWp);
   const installedKwp=(panels*panelWp)/1000;
   const dailyGen=installedKwp*HSP*eff;
 
-const dayUse = totalKwh * DAY_RATIO;
+let dayUse = (totalKwh * DAY_RATIO) + evDay;
+let nightUse = (totalKwh * (1-DAY_RATIO)) + evNight;
 const selfConsumption = Math.min(dayUse, dailyGen);
 const exported = Math.max(0, dailyGen - selfConsumption);
 const gridImport = Math.max(0, totalKwh - selfConsumption);
