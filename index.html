@@ -222,6 +222,20 @@
     </select>
     <p id="hsp-info" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></p>
   </div>
+  <div style="margin-bottom:1rem;">
+    <label style="font-size:12px;color:var(--gray-600);font-weight:500;display:block;margin-bottom:6px;">⚡ Potencia del panel</label>
+    <select id="panel-wp" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:8px 10px;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50);color:var(--gray-900);outline:none;">
+      <option value="400">400 Wp — gama económica</option>
+      <option value="450" selected>450 Wp — estándar residencial</option>
+      <option value="500">500 Wp — alta eficiencia</option>
+      <option value="550">550 Wp — premium</option>
+      <option value="600">600 Wp — premium grande</option>
+      <option value="650">650 Wp — premium grande</option>
+      <option value="700">700 Wp — industrial</option>
+      <option value="900">900 Wp — industrial</option>
+    </select>
+    <p style="font-size:11px;color:var(--gray-400);margin-top:4px;">Más Wp por panel = menos paneles necesarios, pero cada uno es más grande (~1,7–2,2 m²).</p>
+  </div>
   <div class="table-head"><span>Aparato</span><span>Horas/día</span><span>Vatios (W)</span><span></span></div>
     <div id="appliances-list"></div>
     <button class="add-row-btn" onclick="addAppliance()">+ Añadir aparato</button>
@@ -277,7 +291,7 @@
     <div class="result-hero">
       <div class="rh-label">Paneles solares necesarios</div>
       <div class="rh-num" id="r-panels">—</div>
-      <div class="rh-unit">paneles de 450 Wp</div>
+      <div class="rh-unit">paneles de <span id="r-panel-wp">450</span> Wp</div>
       <div class="result-metrics">
         <div class="rm"><div class="rm-label">Consumo diario total</div><div class="rm-val" id="r-kwh">—</div><div class="rm-unit">kWh/día</div></div>
         <div class="rm"><div class="rm-label">Potencia instalada</div><div class="rm-val" id="r-kwp">—</div><div class="rm-unit">kWp</div></div>
@@ -289,8 +303,8 @@
       <div class="bar-track"><div class="bar-fill" id="r-bar" style="width:0%"></div></div>
       <div class="cov-note" style="line-height:1.8;">
   <strong style="color:var(--gray-600);">¿Cómo se calcula?</strong><br>
-  Se usan paneles de <strong>450 Wp</strong> (~2 m² cada uno), que es el estándar residencial actual. 
-  La fórmula es: <em>kWh/día ÷ (HSP × rendimiento) × 1000 ÷ 450 Wp</em>.<br>
+  Se usan paneles de <strong><span id="method-wp">450</span> Wp</strong> (~1,7–2,2 m² cada uno según modelo).
+  La fórmula es: <em>kWh/día ÷ (HSP × rendimiento) × 1000 ÷ Wp del panel</em>.<br>
   · <strong>HSP <span id="hsp-method">4,5</span> h/día</strong> — horas de sol pico para tu provincia (varía: ~3,3 h en el norte, ~5,6 h en el sur).<br>
   · <strong>Rendimiento 80%</strong> — pérdidas reales del sistema: inversor (~5%), cableado (~2%), temperatura (~5%), suciedad (~3%) y sombreado (~5%).<br>
   · El resultado es orientativo. Una instalación real la dimensiona un técnico según tu ubicación exacta, orientación del tejado e inclinación.
@@ -535,7 +549,7 @@ function calcular(){
   const appKwh=appliances.reduce((s,a)=>s+(a.watts*a.hours)/1000,0);
   const evKwh=getEVDailyKwh();
   const totalKwh=(invoiceKwh&&invoiceKwh>appKwh?invoiceKwh:appKwh)+evKwh;
-  const HSP=+document.getElementById("provincia").value||4.5,eff=0.80,panelWp=450;
+  const HSP=+document.getElementById("provincia").value||4.5,eff=0.80,panelWp=+document.getElementById("panel-wp").value||450;
   const panelsNeeded=Math.ceil((totalKwh/(HSP*eff))*1000/panelWp);
 
   // Roof limit
@@ -561,6 +575,8 @@ function calcular(){
   document.getElementById('r-kwh').textContent=totalKwh.toFixed(2);
   document.getElementById('r-kwp').textContent=installedKwp.toFixed(1);
   document.getElementById('r-home').textContent=appKwh.toFixed(2);
+  document.getElementById('r-panel-wp').textContent=panelWp;
+  const mwp=document.getElementById('method-wp'); if(mwp)mwp.textContent=panelWp;
   document.getElementById('r-cover').textContent=cover+'%';
   document.getElementById('r-bar').style.width=cover+'%';
 
