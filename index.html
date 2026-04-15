@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora Solar Mejorada</title>
+</head>
+<body>
+<h1>Archivo simplificado (demo funcional con mejoras)</h1>
+
+<script>
+const DAY_RATIO = 0.35;
+
+let evOn = true;
+
+function getEVDailyKwh(){
+  const battery = 19;
+  const km = 200;
+  const range = 100;
+  const lossFactor = 1.12;
+  return ((km/100) * ((battery/range)*100) * lossFactor) / 7;
+}
+
+function calcular(){
+  const appKwh = 20;
+  const evKwh = getEVDailyKwh();
+
+  const totalKwh = appKwh + evKwh;
+
+  const dayUse = totalKwh * DAY_RATIO;
+
+  const HSP = 4.6;
+  const eff = 0.80;
+  const panelWp = 450;
+
+  const panelsNeeded = Math.ceil((totalKwh / (HSP * eff)) * 1000 / panelWp);
+  const installedKwp = (panelsNeeded * panelWp) / 1000;
+  const dailyGen = installedKwp * HSP * eff;
+
+  const selfConsumption = Math.min(dayUse, dailyGen);
+  const exported = Math.max(0, dailyGen - selfConsumption);
+  const gridImport = Math.max(0, totalKwh - selfConsumption);
+
+  document.body.innerHTML += "<p>Paneles: " + panelsNeeded + "</p>";
+  document.body.innerHTML += "<p>Autoconsumo: " + selfConsumption.toFixed(2) + " kWh</p>";
+  document.body.innerHTML += "<p>Red: " + gridImport.toFixed(2) + " kWh</p>";
+  document.body.innerHTML += "<p>Excedente: " + exported.toFixed(2) + " kWh</p>";
+}
+
+calcular();
+</script>
+
+</body>
+</html>
