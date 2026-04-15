@@ -228,11 +228,12 @@
       <option value="400">400 Wp — gama económica</option>
       <option value="450" selected>450 Wp — estándar residencial</option>
       <option value="500">500 Wp — alta eficiencia</option>
+      
       <option value="550">550 Wp — premium</option>
       <option value="600">600 Wp — premium grande</option>
-      <option value="650">650 Wp — premium grande</option>
-      <option value="700">700 Wp — industrial</option>
-      <option value="900">900 Wp — industrial</option>
+<option value="650">650 Wp — premium grande</option>
+<option value="700">700 Wp — industrial</option>
+<option value="900">900 Wp — industrial</option>
     </select>
     <p style="font-size:11px;color:var(--gray-400);margin-top:4px;">Más Wp por panel = menos paneles necesarios, pero cada uno es más grande (~1,7–2,2 m²).</p>
   </div>
@@ -573,6 +574,8 @@ function calcular(){
   const dailyGen=installedKwp*HSP*eff;
 
   const dayUse = totalKwh * DAY_RATIO;
+  const nightUse = totalKwh * (1 - DAY_RATIO);
+
   const selfConsumption = Math.min(dayUse, dailyGen);
   const exported = Math.max(0, dailyGen - selfConsumption);
   const gridImport = Math.max(0, totalKwh - selfConsumption);
@@ -587,22 +590,19 @@ function calcular(){
   document.getElementById('r-cover').textContent=cover+'%';
   document.getElementById('r-bar').style.width=cover+'%';
 
-  // Nuevos datos realistas
-  const extra = `
-    <div class="breakdown" style="margin-top:10px;">
-      🔋 Autoconsumo real: <strong>${selfConsumption.toFixed(2)} kWh/día</strong><br>
-      ⚡ Compras a red: <strong>${gridImport.toFixed(2)} kWh/día</strong><br>
-      ☀️ Excedentes: <strong>${exported.toFixed(2)} kWh/día</strong>
-    </div>`;
-  document.getElementById('r-breakdown').innerHTML += extra;
-
   let bd=roofLimited
     ?`Tu tejado permite instalar <strong>${maxPanels} paneles de ${panelWp}W</strong> (${installedKwp.toFixed(1)} kWp), que generarían ~${dailyGen.toFixed(1)} kWh/día. Para cubrir tu consumo completo necesitarías ${panelsNeeded} paneles.`
     :`Con <strong>${panels} paneles de ${panelWp}W</strong> (${installedKwp.toFixed(1)} kWp) generarías ~${dailyGen.toFixed(1)} kWh/día.`;
   if(evKwh>0)bd+=` El coche supone ${evKwh.toFixed(2)} kWh/día (${Math.round(evKwh/totalKwh*100)}% del total).`;
   if(invoiceKwh&&invoiceKwh>appKwh)bd+=` Se ha usado el dato de la factura (${invoiceKwh.toFixed(1)} kWh/día) por ser mayor que la suma de aparatos.`;
   bd+=` Estimación orientativa: el resultado real depende de ubicación, orientación, sombras y modelo de panel.`;
-  document.getElementById('r-breakdown').innerHTML=bd;
+  document.getElementById('r-breakdown').innerHTML=bd + `
+<br><br>
+🔋 Autoconsumo real: <strong>${selfConsumption.toFixed(2)} kWh/día</strong><br>
+🌙 Consumo nocturno: <strong>${nightUse.toFixed(2)} kWh/día</strong><br>
+⚡ Compras a red: <strong>${gridImport.toFixed(2)} kWh/día</strong><br>
+☀️ Excedentes: <strong>${exported.toFixed(2)} kWh/día</strong>
+`;
   const results=document.getElementById('results');
   results.style.display='block';
   setTimeout(()=>results.scrollIntoView({behavior:'smooth',block:'start'}),50);
