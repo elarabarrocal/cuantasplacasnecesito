@@ -228,12 +228,9 @@
       <option value="400">400 Wp — gama económica</option>
       <option value="450" selected>450 Wp — estándar residencial</option>
       <option value="500">500 Wp — alta eficiencia</option>
-      
+      <option value="525">525 Wp — alta eficiencia</option>
       <option value="550">550 Wp — premium</option>
       <option value="600">600 Wp — premium grande</option>
-<option value="650">650 Wp — premium grande</option>
-<option value="700">700 Wp — industrial</option>
-<option value="900">900 Wp — industrial</option>
     </select>
     <p style="font-size:11px;color:var(--gray-400);margin-top:4px;">Más Wp por panel = menos paneles necesarios, pero cada uno es más grande (~1,7–2,2 m²).</p>
   </div>
@@ -286,7 +283,39 @@
     <div id="invoice-detail" style="display:none;margin-top:8px;" class="info-box"></div>
   </div>
 
-  <button class="cta-btn" onclick="calcular()">☀ Calcular mis placas solares</button>
+  
+<div class="card" style="margin-top:10px;">
+  <div class="card-header">
+    <div class="card-icon" style="background:#E0F2FE;">⚙️</div>
+    <div>
+      <div class="card-title">Modo de optimización</div>
+      <div class="card-subtitle">Elige cómo quieres dimensionar tu instalación</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;">
+
+    <label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
+      <input type="radio" name="mode" value="day" checked style="margin-right:8px;">
+      <strong>Autoconsumo (equilibrado)</strong><br>
+      <span style="font-size:12px;color:#64748B;">
+        Ajusta las placas para cubrir lo que consumes durante el día. 
+        Minimiza excedentes y aprovecha mejor la energía.
+      </span>
+    </label>
+
+    <label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
+      <input type="radio" name="mode" value="roi" style="margin-right:8px;">
+      <strong>Optimizado por ahorro (€)</strong><br>
+      <span style="font-size:12px;color:#64748B;">
+        Reduce la inversión inicial. Menos placas, pero mayor rentabilidad por euro invertido.
+      </span>
+    </label>
+
+  </div>
+</div>
+
+<button class="cta-btn" onclick="calcular()">☀ Calcular mis placas solares</button>
 
   <div id="results">
     <div class="result-hero">
@@ -545,15 +574,23 @@ function getEVDailyKwh(){
   const km=+document.getElementById('ev-km').value||200;
   const range=+document.getElementById('ev-range').value||350;
   if(range<=0)return 0;
-  const lossFactor = 1.12;
-  return ((km/100)*((battery/range)*100)*lossFactor)/7;
+  return (km/100)*((battery/range)*100)/7;
 }
 function calcular(){
   const appKwh=appliances.reduce((s,a)=>s+(a.watts*a.hours)/1000,0);
   const evKwh=getEVDailyKwh();
   const totalKwh=(invoiceKwh&&invoiceKwh>appKwh?invoiceKwh:appKwh)+evKwh;
   const HSP=+document.getElementById("provincia").value||4.5,eff=0.80,panelWp=+document.getElementById("panel-wp").value||450;
-  const panelsNeeded=Math.ceil((totalKwh/(HSP*eff))*1000/panelWp);
+  
+const mode = document.querySelector('input[name="mode"]:checked').value;
+
+let targetKwh;
+
+if (mode === "day") targetKwh = totalKwh * DAY_RATIO;
+if (mode === "roi") targetKwh = totalKwh * DAY_RATIO * 0.7;
+
+const panelsNeeded = Math.ceil((targetKwh/(HSP*eff))*1000/panelWp);
+
 
   // Roof limit
   const roofM2=+document.getElementById('roof-m2').value||0;
@@ -572,13 +609,6 @@ function calcular(){
 
   const installedKwp=(panels*panelWp)/1000;
   const dailyGen=installedKwp*HSP*eff;
-
-  const dayUse = totalKwh * DAY_RATIO;
-  const nightUse = totalKwh * (1 - DAY_RATIO);
-
-  const selfConsumption = Math.min(dayUse, dailyGen);
-  const exported = Math.max(0, dailyGen - selfConsumption);
-  const gridImport = Math.max(0, totalKwh - selfConsumption);
   const cover=Math.min(100,Math.round((dailyGen/totalKwh)*100));
 
   document.getElementById('r-panels').textContent=roofLimited?`${maxPanels} / ${panelsNeeded}`:panels;
@@ -596,13 +626,7 @@ function calcular(){
   if(evKwh>0)bd+=` El coche supone ${evKwh.toFixed(2)} kWh/día (${Math.round(evKwh/totalKwh*100)}% del total).`;
   if(invoiceKwh&&invoiceKwh>appKwh)bd+=` Se ha usado el dato de la factura (${invoiceKwh.toFixed(1)} kWh/día) por ser mayor que la suma de aparatos.`;
   bd+=` Estimación orientativa: el resultado real depende de ubicación, orientación, sombras y modelo de panel.`;
-  document.getElementById('r-breakdown').innerHTML=bd + `
-<br><br>
-🔋 Autoconsumo real: <strong>${selfConsumption.toFixed(2)} kWh/día</strong><br>
-🌙 Consumo nocturno: <strong>${nightUse.toFixed(2)} kWh/día</strong><br>
-⚡ Compras a red: <strong>${gridImport.toFixed(2)} kWh/día</strong><br>
-☀️ Excedentes: <strong>${exported.toFixed(2)} kWh/día</strong>
-`;
+  document.getElementById('r-breakdown').innerHTML=bd;
   const results=document.getElementById('results');
   results.style.display='block';
   setTimeout(()=>results.scrollIntoView({behavior:'smooth',block:'start'}),50);
