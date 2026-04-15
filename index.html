@@ -492,8 +492,23 @@ function recalcEV(){
   } else {
     info.innerHTML=`Cargando según lo consumido: ~${weeklyKwh.toFixed(1)} kWh/semana → <strong>${dailyKwh.toFixed(2)} kWh/día</strong> de media (${kwhPer100.toFixed(1)} kWh/100 km).`;
   }
-  warn.style.display=km>range?'block':'none';
-  if(km>range)warn.textContent=`Atención: recorres ${km} km/semana pero la autonomía declarada es ${range} km. Revisa los datos.`;
+  
+const chargesPerWeek = km / range;
+if (chargesPerWeek > 7) {
+  warn.style.display='block';
+} else if (chargesPerWeek > 4) {
+  warn.style.display='block';
+} else {
+  warn.style.display='none';
+}
+
+  
+if (chargesPerWeek > 7) {
+  warn.textContent = `Atención: necesitas cargar ~${chargesPerWeek.toFixed(1)} veces/semana (>1/día).`;
+} else if (chargesPerWeek > 4) {
+  warn.textContent = `Uso alto: ~${chargesPerWeek.toFixed(1)} cargas/semana.`;
+}
+
 }
 function handleInvoiceManual(input){
   const val=+input.value;
@@ -574,7 +589,8 @@ function getEVDailyKwh(){
   const km=+document.getElementById('ev-km').value||200;
   const range=+document.getElementById('ev-range').value||350;
   if(range<=0)return 0;
-  return (km/100)*((battery/range)*100)/7;
+  const lossFactor = 1.12;
+  return ((km/100)*((battery/range)*100)*lossFactor)/7;
 }
 function calcular(){
   const appKwh=appliances.reduce((s,a)=>s+(a.watts*a.hours)/1000,0);
@@ -582,12 +598,18 @@ function calcular(){
   const totalKwh=(invoiceKwh&&invoiceKwh>appKwh?invoiceKwh:appKwh)+evKwh;
   const HSP=+document.getElementById("provincia").value||4.5,eff=0.80,panelWp=+document.getElementById("panel-wp").value||450;
   
-const mode = document.querySelector('input[name="mode"]:checked').value;
+const modeEl = document.querySelector('input[name="mode"]:checked');
+const mode = modeEl ? modeEl.value : "day";
 
 let targetKwh;
 
-if (mode === "day") targetKwh = totalKwh * DAY_RATIO;
-if (mode === "roi") targetKwh = totalKwh * DAY_RATIO * 0.7;
+if (mode === "day") {
+  targetKwh = totalKwh * DAY_RATIO;
+} else if (mode === "roi") {
+  targetKwh = totalKwh * DAY_RATIO * 0.7;
+} else {
+  targetKwh = totalKwh * DAY_RATIO;
+}
 
 const panelsNeeded = Math.ceil((targetKwh/(HSP*eff))*1000/panelWp);
 
@@ -609,6 +631,12 @@ const panelsNeeded = Math.ceil((targetKwh/(HSP*eff))*1000/panelWp);
 
   const installedKwp=(panels*panelWp)/1000;
   const dailyGen=installedKwp*HSP*eff;
+
+const dayUse = totalKwh * DAY_RATIO;
+const selfConsumption = Math.min(dayUse, dailyGen);
+const exported = Math.max(0, dailyGen - selfConsumption);
+const gridImport = Math.max(0, totalKwh - selfConsumption);
+
   const cover=Math.min(100,Math.round((dailyGen/totalKwh)*100));
 
   document.getElementById('r-panels').textContent=roofLimited?`${maxPanels} / ${panelsNeeded}`:panels;
@@ -626,7 +654,12 @@ const panelsNeeded = Math.ceil((targetKwh/(HSP*eff))*1000/panelWp);
   if(evKwh>0)bd+=` El coche supone ${evKwh.toFixed(2)} kWh/día (${Math.round(evKwh/totalKwh*100)}% del total).`;
   if(invoiceKwh&&invoiceKwh>appKwh)bd+=` Se ha usado el dato de la factura (${invoiceKwh.toFixed(1)} kWh/día) por ser mayor que la suma de aparatos.`;
   bd+=` Estimación orientativa: el resultado real depende de ubicación, orientación, sombras y modelo de panel.`;
-  document.getElementById('r-breakdown').innerHTML=bd;
+  document.getElementById('r-breakdown').innerHTML=bd + `
+<br><br>
+🔋 Autoconsumo: ${selfConsumption.toFixed(2)} kWh<br>
+⚡ Red: ${gridImport.toFixed(2)} kWh<br>
+☀️ Excedente: ${exported.toFixed(2)} kWh
+`;
   const results=document.getElementById('results');
   results.style.display='block';
   setTimeout(()=>results.scrollIntoView({behavior:'smooth',block:'start'}),50);
