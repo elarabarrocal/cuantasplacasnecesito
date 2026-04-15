@@ -293,27 +293,37 @@
     </div>
   </div>
 
-  <div style="display:flex;flex-direction:column;gap:10px;">
+  
+<div style="display:flex;flex-direction:column;gap:10px;">
 
-    <label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
-      <input type="radio" name="mode" value="day" checked style="margin-right:8px;">
-      <strong>Autoconsumo (equilibrado)</strong><br>
-      <span style="font-size:12px;color:#64748B;">
-        Ajusta las placas para cubrir lo que consumes durante el día. 
-        Minimiza excedentes y aprovecha mejor la energía.
-      </span>
-    </label>
+<label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
+  <input type="radio" name="mode" value="day" checked style="margin-right:8px;">
+  <strong>Autoconsumo (equilibrado)</strong><br>
+  <span style="font-size:12px;color:#64748B;">
+    Ajusta las placas para cubrir lo que consumes durante el día. 
+    Minimiza excedentes y aprovecha mejor la energía.
+  </span>
+</label>
 
-    <label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
-      <input type="radio" name="mode" value="roi" style="margin-right:8px;">
-      <strong>Optimizado por ahorro (€)</strong><br>
-      <span style="font-size:12px;color:#64748B;">
-        Reduce la inversión inicial. Menos placas, pero mayor rentabilidad por euro invertido.
-      </span>
-    </label>
+<label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
+  <input type="radio" name="mode" value="roi" style="margin-right:8px;">
+  <strong>Optimizado por ahorro (€) (ROI)</strong><br>
+  <span style="font-size:12px;color:#64748B;">
+    Reduce la inversión inicial. Menos placas, mayor rentabilidad por euro invertido.
+  </span>
+</label>
 
-  </div>
+<label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
+  <input type="radio" name="mode" value="full" style="margin-right:8px;">
+  <strong>Autosuficiencia (máxima cobertura)</strong><br>
+  <span style="font-size:12px;color:#64748B;">
+    Dimensiona para cubrir todo tu consumo. No es eficiente sin batería: genera excedentes y tiene peor rentabilidad.
+  </span>
+</label>
+
 </div>
+</div>
+
 
 <button class="cta-btn" onclick="calcular()">☀ Calcular mis placas solares</button>
 
@@ -598,17 +608,16 @@ function calcular(){
   const totalKwh=(invoiceKwh&&invoiceKwh>appKwh?invoiceKwh:appKwh)+evKwh;
   const HSP=+document.getElementById("provincia").value||4.5,eff=0.80,panelWp=+document.getElementById("panel-wp").value||450;
   
-const modeEl = document.querySelector('input[name="mode"]:checked');
-const mode = modeEl ? modeEl.value : "day";
+const mode = document.querySelector('input[name="mode"]:checked').value;
 
 let targetKwh;
 
-if (mode === "day") {
+if (mode === "full") {
+  targetKwh = totalKwh;
+} else if (mode === "day") {
   targetKwh = totalKwh * DAY_RATIO;
 } else if (mode === "roi") {
   targetKwh = totalKwh * DAY_RATIO * 0.7;
-} else {
-  targetKwh = totalKwh * DAY_RATIO;
 }
 
 const panelsNeeded = Math.ceil((targetKwh/(HSP*eff))*1000/panelWp);
