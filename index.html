@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Solar</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sun: #F59E0B; --green: #059669; --green-light: #D1FAE5; --green-dark: #065F46;
+    --blue-light: #E0F2FE; --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1; --gray-400: #94A3B8; --gray-600: #475569; --gray-700: #334155;
+    --gray-900: #0F172A; --red: #EF4444; --red-light: #FEF2F2; --amber: #D97706;
+    --amber-light: #FFFBEB; --info-bg: #E0F2FE; --info-border: #BAE6FD; --info-text: #0369A1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
+  header { background: var(--gray-900); padding: 2rem 0 3.5rem; position: relative; overflow: hidden; }
+  header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%); }
+  .header-inner { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 500; color: var(--sun); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sun); }
+  header h1 { font-size: 2rem; font-weight: 600; color: #fff; line-height: 1.2; margin-bottom: 0.5rem; }
+  header h1 span { color: var(--sun); }
+  header p { font-size: 14px; color: var(--gray-400); font-weight: 300; }
+  main { max-width: 760px; margin: -1.5rem auto 3rem; padding: 0 1.5rem; position: relative; }
+  .card { background: #fff; border: 1px solid var(--gray-200); border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+  .card-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .card-title { font-size: 15px; font-weight: 600; }
+  .card-subtitle { font-size: 12px; color: var(--gray-400); margin-top: 1px; }
+  .table-head { display: grid; grid-template-columns: 1fr 100px 90px 32px; gap: 8px; padding: 0 0 8px; border-bottom: 1px solid var(--gray-100); }
+  .table-head span { font-size: 11px; color: var(--gray-400); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .table-head span:nth-child(2), .table-head span:nth-child(3) { text-align: right; }
+  .appliance-row { display: grid; grid-template-columns: 1fr 100px 90px 32px; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--gray-100); }
+  .appliance-row:last-child { border-bottom: none; }
+  .app-name { font-size: 13px; background: transparent; border: none; outline: none; color: var(--gray-900); font-family: 'DM Sans', sans-serif; width: 100%; padding: 3px 0; }
+  .app-name:focus { background: var(--gray-50); border-radius: 4px; padding: 3px 6px; }
+  .num-input { width: 100%; font-size: 13px; font-family: 'DM Mono', monospace; padding: 5px 8px; text-align: right; border: 1px solid var(--gray-200); border-radius: 7px; background: var(--gray-50); color: var(--gray-900); outline: none; transition: border-color 0.15s; }
+  .num-input:focus { border-color: var(--green); background: #fff; }
+  .w-field { display: flex; align-items: center; gap: 4px; }
+  .w-unit { font-size: 11px; color: var(--gray-400); font-family: 'DM Mono', monospace; }
+  .del-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--gray-200); background: transparent; color: var(--gray-400); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .del-btn:hover { background: var(--red-light); border-color: #FECACA; color: var(--red); }
+  .add-row-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-400); border: 1px dashed var(--gray-300); border-radius: 8px; padding: 7px 12px; cursor: pointer; background: transparent; width: 100%; margin-top: 10px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .add-row-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+  .toggle-wrap { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+  .toggle { width: 40px; height: 22px; border-radius: 11px; background: var(--gray-200); position: relative; transition: background 0.2s; flex-shrink: 0; cursor: pointer; border: none; outline: none; }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .toggle.on { background: var(--green); }
+  .toggle.on::after { transform: translateX(18px); }
+  .toggle-label { font-size: 14px; font-weight: 500; }
+  #ev-fields { display: none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-100); }
+  .ev-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .ev-field label { font-size: 12px; color: var(--gray-600); font-weight: 500; display: block; margin-bottom: 5px; }
+  .ev-field input { width: 100%; font-size: 14px; font-family: 'DM Mono', monospace; padding: 8px 10px; border: 1px solid var(--gray-200); border-radius: 8px; background: var(--gray-50); color: var(--gray-900); outline: none; transition: border-color 0.15s; }
+  .ev-field input:focus { border-color: #0EA5E9; background: #fff; }
+  .ev-field .hint { font-size: 11px; color: var(--gray-400); margin-top: 3px; font-family: 'DM Mono', monospace; }
+  .charge-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+  .ctab { flex: 1; padding: 7px 10px; font-size: 12px; font-weight: 500; border: 1px solid var(--gray-200); border-radius: 8px; cursor: pointer; background: transparent; color: var(--gray-600); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .ctab.active { background: var(--info-bg); border-color: var(--info-border); color: var(--info-text); }
+  .info-box { background: var(--info-bg); border: 1px solid var(--info-border); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--info-text); line-height: 1.6; }
+  .warn-box { background: var(--amber-light); border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--amber); line-height: 1.6; margin-top: 8px; display: none; }
+  .upload-zone { border: 1.5px dashed var(--gray-300); border-radius: 10px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .upload-zone:hover { border-color: var(--sun); background: #FFFBEB; }
+  .upload-zone p { font-size: 13px; color: var(--gray-600); }
+  .upload-zone .small { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+  .upload-icon { font-size: 24px; margin-bottom: 8px; }
+  #invoice-ok { font-size: 12px; color: var(--green); margin-top: 8px; display: none; font-weight: 500; }
+  #invoice-detail { display: none; margin-top: 8px; }
+  .cta-btn { width: 100%; padding: 14px; font-size: 16px; font-weight: 600; font-family: 'DM Sans', sans-serif; background: var(--gray-900); color: #fff; border: none; border-radius: 12px; cursor: pointer; margin: 1.25rem 0; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .cta-btn:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(6,95,70,0.3); }
+  #results { display: none; }
+  .result-hero { background: var(--gray-900); border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; position: relative; overflow: hidden; }
+  .result-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(5,150,105,0.25) 0%, transparent 70%); }
+  .rh-label { font-size: 11px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .rh-num { font-size: 3rem; font-weight: 600; color: #fff; font-family: 'DM Mono', monospace; line-height: 1; }
+  .rh-unit { font-size: 14px; color: var(--gray-400); margin-top: 4px; margin-bottom: 1.25rem; }
+  .result-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .rm { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; }
+  .rm-label { font-size: 11px; color: var(--gray-400); margin-bottom: 4px; }
+  .rm-val { font-size: 18px; font-weight: 600; color: #fff; font-family: 'DM Mono', monospace; }
+  .rm-unit { font-size: 11px; color: #6B7280; margin-top: 2px; }
+  .coverage-wrap { background: #fff; border: 1px solid var(--gray-200); border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; }
+  .cov-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .cov-title { font-size: 13px; font-weight: 500; }
+  .cov-pct { font-size: 22px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--green); }
+  .bar-track { height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--green), #34D399); transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+  .cov-note { font-size: 11px; color: var(--gray-400); margin-top: 8px; }
+  .breakdown { background: var(--gray-50); border-radius: 10px; padding: 12px; font-size: 12px; color: var(--gray-600); line-height: 1.8; margin-top: 8px; }
+  .ads-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .ads-title { font-size: 13px; font-weight: 600; }
+  .ads-badge { font-size: 10px; color: var(--gray-400); background: var(--gray-100); border-radius: 4px; padding: 2px 6px; }
+  .ads-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .ad-card { border: 1px solid var(--gray-200); border-radius: 12px; padding: 1rem; background: #fff; text-align: center; }
+  .ad-logo { width: 44px; height: 44px; border-radius: 12px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .ad-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .ad-zone { font-size: 11px; color: var(--gray-400); margin-bottom: 10px; }
+  .ad-btn { width: 100%; padding: 7px; font-size: 12px; font-weight: 500; border: 1px solid var(--gray-200); border-radius: 7px; cursor: pointer; background: transparent; color: var(--gray-700); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .ad-btn:hover { background: var(--green-light); border-color: #6EE7B7; color: var(--green-dark); }
+  .ads-disclaimer { font-size: 10px; color: var(--gray-400); margin-top: 8px; text-align: center; }
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.5rem; }
+    .ev-grid { grid-template-columns: 1fr 1fr; }
+    .result-metrics { grid-template-columns: 1fr 1fr; }
+    .ads-grid { grid-template-columns: 1fr; }
+    .table-head, .appliance-row { grid-template-columns: 1fr 80px 80px 28px; }
+  }
+  .tooltip-wrap { position: relative; display: inline; cursor: help; border-bottom: 1px dashed var(--gray-400); }
+  .tooltip-box { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--gray-900); color: #fff; font-size: 11px; line-height: 1.6; padding: 8px 10px; border-radius: 8px; width: 200px; z-index: 100; pointer-events: none; }
+  .tooltip-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--gray-900); }
+  .tooltip-wrap:hover .tooltip-box { display: block; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="badge"><div class="dot"></div>Calculadora gratuita</div>
+    <h1>¿Cuántos paneles <span>solares</span> necesitas?</h1>
+    <p>Introduce tus aparatos, tu coche eléctrico y tu factura para obtener una estimación personalizada.</p>
+  </div>
+</header>
+<main>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--green-light);">⚡</div>
+      <div><div class="card-title">Electrodomésticos y aparatos</div><div class="card-subtitle">Ajusta las horas de uso diarias y la potencia de cada aparato</div></div>
+    </div>
+    <div style="margin-bottom:1rem;">
+    <label style="font-size:12px;color:var(--gray-600);font-weight:500;display:block;margin-bottom:6px;">📍 Provincia</label>
+    <select id="provincia" onchange="updateHSP()" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:8px 10px;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50);color:var(--gray-900);outline:none;">
+      <option value="4.5">— Selecciona tu provincia —</option>
+      <optgroup label="Andalucía">
+        <option value="5.5">Almería</option>
+        <option value="5.3">Cádiz</option>
+        <option value="5.2">Córdoba</option>
+        <option value="5.0">Granada</option>
+        <option value="5.1">Huelva</option>
+        <option value="5.0">Jaén</option>
+        <option value="5.2">Málaga</option>
+        <option value="5.3">Sevilla</option>
+      </optgroup>
+      <optgroup label="Aragón">
+        <option value="4.7">Huesca</option>
+        <option value="4.8">Teruel</option>
+        <option value="4.8">Zaragoza</option>
+      </optgroup>
+      <optgroup label="Asturias">
+        <option value="3.3">Asturias</option>
+      </optgroup>
+      <optgroup label="Baleares">
+        <option value="5.0">Baleares</option>
+      </optgroup>
+      <optgroup label="Canarias">
+        <option value="5.6">Las Palmas</option>
+        <option value="5.4">Santa Cruz de Tenerife</option>
+      </optgroup>
+      <optgroup label="Cantabria">
+        <option value="3.4">Cantabria</option>
+      </optgroup>
+      <optgroup label="Castilla-La Mancha">
+        <option value="4.9">Albacete</option>
+        <option value="4.9">Ciudad Real</option>
+        <option value="4.8">Cuenca</option>
+        <option value="4.8">Guadalajara</option>
+        <option value="4.9">Toledo</option>
+      </optgroup>
+      <optgroup label="Castilla y León">
+        <option value="4.4">Ávila</option>
+        <option value="4.3">Burgos</option>
+        <option value="4.4">León</option>
+        <option value="4.5">Palencia</option>
+        <option value="4.6">Salamanca</option>
+        <option value="4.3">Segovia</option>
+        <option value="4.6">Soria</option>
+        <option value="4.6">Valladolid</option>
+        <option value="4.4">Zamora</option>
+      </optgroup>
+      <optgroup label="Cataluña">
+        <option value="4.6">Barcelona</option>
+        <option value="4.7">Girona</option>
+        <option value="4.7">Lleida</option>
+        <option value="4.8">Tarragona</option>
+      </optgroup>
+      <optgroup label="Comunidad Valenciana">
+        <option value="5.0">Alicante</option>
+        <option value="4.9">Castellón</option>
+        <option value="4.9">Valencia</option>
+      </optgroup>
+      <optgroup label="Extremadura">
+        <option value="5.2">Badajoz</option>
+        <option value="5.1">Cáceres</option>
+      </optgroup>
+      <optgroup label="Galicia">
+        <option value="3.5">A Coruña</option>
+        <option value="3.6">Lugo</option>
+        <option value="3.6">Ourense</option>
+        <option value="3.7">Pontevedra</option>
+      </optgroup>
+      <optgroup label="La Rioja">
+        <option value="4.5">La Rioja</option>
+      </optgroup>
+      <optgroup label="Madrid">
+        <option value="4.8">Madrid</option>
+      </optgroup>
+      <optgroup label="Murcia">
+        <option value="5.3">Murcia</option>
+      </optgroup>
+      <optgroup label="Navarra">
+        <option value="4.2">Navarra</option>
+      </optgroup>
+      <optgroup label="País Vasco">
+        <option value="3.5">Álava</option>
+        <option value="3.3">Guipúzcoa</option>
+        <option value="3.4">Vizcaya</option>
+      </optgroup>
+      <optgroup label="Ceuta y Melilla">
+        <option value="5.2">Ceuta</option>
+        <option value="5.3">Melilla</option>
+      </optgroup>
+    </select>
+    <p id="hsp-info" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></p>
+  </div>
+  <div style="margin-bottom:1rem;">
+    <label style="font-size:12px;color:var(--gray-600);font-weight:500;display:block;margin-bottom:6px;">⚡ Potencia del panel</label>
+    <select id="panel-wp" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:8px 10px;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50);color:var(--gray-900);outline:none;">
+      <option value="400">400 Wp — gama económica</option>
+      <option value="450" selected>450 Wp — estándar residencial</option>
+      <option value="500">500 Wp — alta eficiencia</option>
+      <option value="525">525 Wp — alta eficiencia</option>
+      <option value="550">550 Wp — premium</option>
+      <option value="600">600 Wp — premium grande</option>
+      <option value="700">700 Wp — industrial</option>
+      <option value="900">900 Wp — industrial</option>
+    </select>
+    <p style="font-size:11px;color:var(--gray-400);margin-top:4px;">Más Wp por panel = menos paneles necesarios, pero cada uno es más grande (~1,7–2,2 m²).</p>
+  </div>
+  <div class="table-head"><span>Aparato</span><span>Horas/día</span><span>Vatios (W)</span><span></span></div>
+    <div id="appliances-list"></div>
+    <button class="add-row-btn" onclick="addAppliance()">+ Añadir aparato</button>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);">
+    <span style="font-size:13px;color:var(--gray-600);">🏠 m² de tejado disponible</span>
+    <input class="num-input" type="number" id="roof-m2" min="0" step="1" placeholder="ej. 30" style="width:90px;" oninput="this.value=Math.max(0,+this.value||0)">
+    <span style="font-size:11px;color:var(--gray-400);">(opcional)</span><br><span style="font-size:11px;color:var(--gray-400);">Sur: máxima producción total anual. Sureste produce más por la mañana y suroeste más por la tarde, pero ambas generan menos energía que el sur.<br>Introduce los m² del tejado orientados hacia estas direcciones.</span>
+  </div>
+  <div id="roof-warn" style="display:none;margin-top:8px;" class="warn-box"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--blue-light);">🚗</div>
+      <div><div class="card-title">Vehículo eléctrico o híbrido enchufable</div><div class="card-subtitle">Solo si lo cargas habitualmente en casa</div></div>
+    </div>
+    <div class="toggle-wrap" onclick="toggleEV()">
+      <button class="toggle" id="ev-toggle" type="button"></button>
+      <span class="toggle-label" id="ev-label">No tengo/no cargo en casa</span>
+    </div>
+    <div id="ev-fields">
+      <div class="ev-grid">
+        <div class="ev-field"><label>Capacidad de batería</label><input type="number" id="ev-battery" value="60" min="5" max="250" step="1" oninput="recalcEV()"><div class="hint">kWh</div></div>
+        <div class="ev-field"><label>Km semanales</label><input type="number" id="ev-km" value="200" min="0" step="10" oninput="recalcEV()"><div class="hint">km/semana</div></div>
+        <div class="ev-field"><label>Autonomía real</label><input type="number" id="ev-range" value="350" min="50" max="800" step="10" oninput="recalcEV()"><div class="hint">km con carga completa</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--gray-600);font-weight:500;margin-bottom:6px;">Modo de carga habitual</div>
+      <div class="charge-tabs">
+        <button class="ctab active" id="ctab-full" onclick="setCharge('full')">Carga completa cada X días</button>
+        <button class="ctab" id="ctab-partial" onclick="setCharge('partial')">Según km recorridos</button>
+      </div>
+
+      <div style="font-size:12px;color:var(--gray-600);font-weight:500;margin-bottom:6px;">¿Cuándo cargas?</div>
+      <div class="charge-tabs">
+        <button class="ctab" id="ctab-day" onclick="setChargeTime('day')">De día</button>
+        <button class="ctab active" id="ctab-night" onclick="setChargeTime('night')">De noche</button>
+      </div>
+      <div class="info-box" id="ev-info"></div>
+      <div class="warn-box" id="ev-warn"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#FEF3C7;">📄</div>
+      <div><div class="card-title">Factura de la luz (opcional)</div><div class="card-subtitle">Si la subes, el cálculo usará tu consumo real en vez de la suma de aparatos</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <input class="num-input" type="number" id="invoice-kwh" min="0" step="1" placeholder="ej. 250" style="width:120px;" oninput="handleInvoiceManual(this)">
+      <span style="font-size:13px;color:var(--gray-600);">kWh / mes</span>
+    </div>
+    <p style="font-size:11px;color:var(--gray-400);margin-top:6px;">Lo encontrarás en tu factura como "Energía consumida" o "Consumo total".</p>
+    <div id="invoice-detail" style="display:none;margin-top:8px;" class="info-box"></div>
+  </div>
+
+  
+<div class="card" style="margin-top:10px;">
+  <div class="card-header">
+    <div class="card-icon" style="background:#E0F2FE;">⚙️</div>
+    <div>
+      <div class="card-title">Modo de optimización</div>
+      <div class="card-subtitle">Elige cómo quieres dimensionar tu instalación</div>
+    </div>
+  </div>
+
+  
+<div style="display:flex;flex-direction:column;gap:10px;">
+
+<label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
+  <input type="radio" name="mode" value="day" checked style="margin-right:8px;">
+  <strong>Autoconsumo (equilibrado)</strong><br>
+  <span style="font-size:12px;color:#64748B;">
+    Ajusta las placas para cubrir lo que consumes durante el día. 
+    Minimiza excedentes y aprovecha mejor la energía.
+  </span>
+</label>
+
+<label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
+  <input type="radio" name="mode" value="roi" style="margin-right:8px;">
+  <strong>Optimizado por ahorro (€) (ROI)</strong><br>
+  <span style="font-size:12px;color:#64748B;">
+    Reduce la inversión inicial. Menos placas, mayor rentabilidad por euro invertido.
+  </span>
+</label>
+
+<label style="border:1px solid #E2E8F0;border-radius:10px;padding:10px;cursor:pointer;">
+  <input type="radio" name="mode" value="full" style="margin-right:8px;">
+  <strong>Autosuficiencia (máxima cobertura)</strong><br>
+  <span style="font-size:12px;color:#64748B;">
+    Dimensiona para cubrir todo tu consumo. No es eficiente sin batería: genera excedentes y tiene peor rentabilidad.
+  </span>
+</label>
+
+</div>
+</div>
+
+
+<button class="cta-btn" onclick="calcular()">☀ Calcular mis placas solares</button>
+
+  <div id="results">
+    <div class="result-hero">
+      <div class="rh-label">Paneles solares necesarios</div>
+      <div class="rh-num" id="r-panels">—</div>
+      <div class="rh-unit">paneles de <span id="r-panel-wp">450</span> Wp</div>
+      <div class="result-metrics">
+        <div class="rm"><div class="rm-label">Consumo diario total</div><div class="rm-val" id="r-kwh">—</div><div class="rm-unit">kWh/día</div></div>
+        <div class="rm"><div class="rm-label">Potencia instalada</div><div class="rm-val" id="r-kwp">—</div><div class="rm-unit">kWp</div></div>
+        <div class="rm"><div class="rm-label">Solo hogar (sin coche)</div><div class="rm-val" id="r-home">—</div><div class="rm-unit">kWh/día</div></div>
+      </div>
+    </div>
+    <div class="coverage-wrap">
+      <div class="cov-header"><span class="cov-title">Cobertura solar estimada</span><span class="cov-pct" id="r-cover">—%</span></div>
+      <div class="bar-track"><div class="bar-fill" id="r-bar" style="width:0%"></div></div>
+      <div class="cov-note" style="line-height:1.8;">
+  <strong style="color:var(--gray-600);">¿Cómo se calcula?</strong><br>
+  Se usan paneles de <strong><span id="method-wp">450</span> Wp</strong> (~1,7–2,2 m² cada uno según modelo).
+  La fórmula es: <em>kWh/día ÷ (HSP × rendimiento) × 1000 ÷ Wp del panel</em>.<br>
+  · <strong>HSP <span id="hsp-method">4,5</span> h/día</strong> — horas de sol pico para tu provincia (varía: ~3,3 h en el norte, ~5,6 h en el sur).<br>
+  · <strong>Rendimiento 80%</strong> — pérdidas reales del sistema: inversor (~5%), cableado (~2%), temperatura (~5%), suciedad (~3%) y sombreado (~5%).<br>
+  · El resultado es orientativo. Una instalación real la dimensiona un técnico según tu ubicación exacta, orientación del tejado e inclinación.
+</div>
+      <div class="breakdown" id="r-breakdown"></div>
+    </div>
+<div class="card" style="margin-bottom:0;">
+      <div class="ads-header">
+        <span class="ads-title">¿Con quién instalas?</span>
+        <span class="ads-badge">Enlace de referido · tú también te llevas descuento</span>
+      </div>
+      <p style="font-size:12px;color:var(--gray-400);margin-bottom:12px;">Precios orientativos para una instalación media de 5–7 kWp sin batería. El precio real depende de tu tejado, ubicación y consumo.</p>
+      <div class="ads-grid">
+        <div class="ad-card">
+          <div class="ad-logo" style="background:#FEF9C3;font-size:22px;">🌞</div>
+          <div class="ad-name">Holaluz</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Cobertura nacional</div>
+          <div style="font-size:12px;color:var(--gray-700);line-height:1.7;margin-bottom:10px;text-align:left;">
+            <div>💶 <strong>Compra:</strong> ~5.000–8.000€</div>
+            <div>💳 <strong><span class="tooltip-wrap">Financiación<span class="tooltip-box">Los paneles son tuyos desde el día 1. Pagas a plazos con intereses, como un préstamo. Al terminar, son 100% tuyos y puedes pedir subvenciones.</span></span>:</strong> desde ~60€/mes</div>
+            <div>⭐ <strong>Trustpilot:</strong> 4.1 / 5</div>
+            <div style="margin-top:6px;padding:6px 8px;background:var(--green-light);border-radius:6px;font-size:11px;color:var(--green-dark);">🎁 Tú y quien contrata recibís <strong>200€</strong> con referido</div>
+          </div>
+          <a class="ad-btn" href="https://www.holaluz.com" target="_blank" rel="nofollow noopener" style="display:block;text-decoration:none;text-align:center;">Pedir presupuesto →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-logo" style="background:#DBEAFE;font-size:22px;">⚡</div>
+          <div class="ad-name">Otovo</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Cobertura nacional</div>
+          <div style="font-size:12px;color:var(--gray-700);line-height:1.7;margin-bottom:10px;text-align:left;">
+            <div>💶 <strong>Compra:</strong> ~4.500–7.500€</div>
+            <div>🏠 <strong><span class="tooltip-wrap">Alquiler<span class="tooltip-box">Los paneles son de Otovo durante 20 años. Tú pagas una cuota mensual y ellos se encargan del mantenimiento. A los 20 años te los regalan. Ojo: en total pagas ~2.4x el precio y no puedes pedir ciertas subvenciones.</span></span>:</strong> desde ~25€/mes</div>
+            <div>⭐ <strong>Trustpilot:</strong> 3.0 / 5</div>
+            <div style="margin-top:6px;padding:6px 8px;background:var(--green-light);border-radius:6px;font-size:11px;color:var(--green-dark);">🎁 Tú y quien contrata recibís <strong>250€</strong> con referido</div>
+          </div>
+          <a class="ad-btn" href="https://www.otovo.es" target="_blank" rel="nofollow noopener" style="display:block;text-decoration:none;text-align:center;">Pedir presupuesto →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-logo" style="background:#DBEAFE;font-size:22px;">⚡</div>
+          <div class="ad-name">Otovo</div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Cobertura nacional · Compra</div>
+          <div style="font-size:12px;color:var(--gray-700);line-height:1.7;margin-bottom:10px;text-align:left;">
+            <div>💶 <strong>Compra:</strong> ~4.500–7.500€</div>
+            <div>💳 <strong>Financiación:</strong> desde ~50€/mes</div>
+            <div>⭐ <strong>Trustpilot:</strong> 3.0 / 5</div>
+            <div style="margin-top:6px;padding:6px 8px;background:var(--green-light);border-radius:6px;font-size:11px;color:var(--green-dark);">🎁 Tú y quien contrata recibís <strong>250€</strong> con referido</div>
+          </div>
+          <a class="ad-btn" href="https://www.otovo.es" target="_blank" rel="nofollow noopener" style="display:block;text-decoration:none;text-align:center;">Pedir presupuesto →</a>
+        </div>
+      </div>
+      <div class="ads-disclaimer" style="margin-top:10px;">Precios orientativos 2026 para ~5–7 kWp sin batería. Los enlaces de Holaluz y Otovo son referidos — si contratas, ambas partes recibís el descuento indicado. Valoraciones de Trustpilot.</div>
+      <div style="margin-top:16px;border-top:1px solid var(--gray-100);padding-top:14px;">
+        <p style="font-size:12px;color:var(--gray-400);margin-bottom:10px;">¿Quieres empezar pequeño? Kits solares con batería en Amazon</p>
+        <div style="background:var(--gray-50);border:1px dashed var(--gray-200);border-radius:8px;height:90px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:12px;color:var(--gray-400);">[ Banner Amazon afiliado — pendiente de ID ]</span>
+        </div>
+        <p style="font-size:10px;color:var(--gray-400);margin-top:6px;">Enlace de afiliado · Si compras, recibimos una pequeña comisión sin coste para ti.</p>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:760px;margin:2rem auto 2rem;padding:0 1.5rem;">
+    <p style="font-size:11px;color:var(--gray-400);text-align:center;line-height:1.8;">
+      ¿Eres instalador o empresa del sector solar y quieres aparecer en esta calculadora?
+      <a href="mailto:hola@cuantasplacasnecesito.es" style="color:var(--gray-600);text-decoration:underline;">Escríbenos a hola@cuantasplacasnecesito.es</a>
+    </p>
+  </div>
+</main>
+<script>
+const DEFAULT_APPLIANCES = [
+  {name:"Frigorífico",watts:150,hours:24},{name:"Lavadora",watts:2000,hours:0.5},
+  {name:"Lavavajillas",watts:1800,hours:0.5},{name:"Televisor",watts:100,hours:4},
+  {name:"Bombillas",watts:60,hours:6},{name:"Ordenador",watts:600,hours:5},
+  {name:"Aire acondicionado",watts:1500,hours:3}
+];
+let appliances = DEFAULT_APPLIANCES.map(a=>({...a}));
+const DAY_RATIO = 0.35;
+let evOn=false, chargeMode='full', chargeTime='night', invoiceKwh=null;
+
+function renderAppliances(){
+  const list=document.getElementById('appliances-list');
+  list.innerHTML='';
+  appliances.forEach((a,i)=>{
+    const row=document.createElement('div');
+    row.className='appliance-row';
+    row.innerHTML=`<input class="app-name" type="text" value="${a.name}" oninput="appliances[${i}].name=this.value">
+      <input class="num-input" type="number" value="${a.hours}" min="0" max="24" step="0.5" oninput="this.value=Math.min(24,Math.max(0,+this.value));appliances[${i}].hours=+this.value">
+      <div class="w-field"><input class="num-input" type="number" value="${a.watts}" min="1" style="width:82px;" oninput="this.value=Math.max(1,+this.value||1);appliances[${i}].watts=+this.value"><span class="w-unit">W</span></div>
+      <button class="del-btn" onclick="removeAppliance(${i})">✕</button>`;
+    list.appendChild(row);
+  });
+}
+function addAppliance(){appliances.push({name:"Nuevo aparato",watts:100,hours:2});function updateHSP(){
+  const sel=document.getElementById('provincia');
+  const hsp=+sel.value||4.5;
+  const name=sel.options[sel.selectedIndex].text;
+  const info=document.getElementById('hsp-info');
+  const display=document.getElementById('hsp-display');
+  const method=document.getElementById('hsp-method');
+  if(sel.selectedIndex>0){
+    info.textContent=`HSP para ${name}: ${hsp} h/día`;
+    if(display)display.innerHTML=`HSP de ${hsp} h/día (${name})`;
+    if(method)method.textContent=hsp;
+  } else {
+    info.textContent='';
+    if(display)display.innerHTML='HSP media española de 4,5 h/día';
+    if(method)method.textContent='4,5';
+  }
+}
+renderAppliances();}
+function removeAppliance(i){appliances.splice(i,1);function updateHSP(){
+  const sel=document.getElementById('provincia');
+  const hsp=+sel.value||4.5;
+  const name=sel.options[sel.selectedIndex].text;
+  const info=document.getElementById('hsp-info');
+  const display=document.getElementById('hsp-display');
+  const method=document.getElementById('hsp-method');
+  if(sel.selectedIndex>0){
+    info.textContent=`HSP para ${name}: ${hsp} h/día`;
+    if(display)display.innerHTML=`HSP de ${hsp} h/día (${name})`;
+    if(method)method.textContent=hsp;
+  } else {
+    info.textContent='';
+    if(display)display.innerHTML='HSP media española de 4,5 h/día';
+    if(method)method.textContent='4,5';
+  }
+}
+renderAppliances();}
+
+function toggleEV(){
+  evOn=!evOn;
+  document.getElementById('ev-toggle').classList.toggle('on',evOn);
+  document.getElementById('ev-label').textContent=evOn?'Sí, cargo en casa':'No tengo/no cargo en casa';
+  document.getElementById('ev-fields').style.display=evOn?'block':'none';
+  if(evOn)recalcEV();
+}
+function setChargeTime(mode){
+  chargeTime=mode;
+  document.getElementById('ctab-day').classList.toggle('active',mode==='day');
+  document.getElementById('ctab-night').classList.toggle('active',mode==='night');
+}
+
+function setCharge(mode){
+  chargeMode=mode;
+  document.getElementById('ctab-full').classList.toggle('active',mode==='full');
+  document.getElementById('ctab-partial').classList.toggle('active',mode==='partial');
+  recalcEV();
+}
+function recalcEV(){
+  const battery=+document.getElementById('ev-battery').value||60;
+  const km=+document.getElementById('ev-km').value||200;
+  const range=+document.getElementById('ev-range').value||350;
+  if(range<=0)return;
+  const kwhPer100=(battery/range)*100;
+  const weeklyKwh=(km/100)*kwhPer100;
+  const dailyKwh=weeklyKwh/7;
+  const warn=document.getElementById('ev-warn');
+  const info=document.getElementById('ev-info');
+  if(chargeMode==='full'){
+    const days=range/(km/7);
+    const chargesPerWeek=km/range;const chargesPerMonth=chargesPerWeek*4;const weeklyKwhFull=chargesPerWeek*battery;const dailyKwhFull=weeklyKwhFull/7;const freqText=chargesPerWeek>=1?`<strong>~${Math.round(chargesPerWeek)} ${Math.round(chargesPerWeek)===1?'vez':'veces'} por semana</strong> (~${Math.round(chargesPerMonth)} al mes)`:`<strong>~${chargesPerMonth.toFixed(1)} veces al mes</strong>`;info.innerHTML=`Con ${km} km/semana y ${range} km de autonomía, necesitas cargar ${freqText}. Cada carga completa son ~${battery} kWh → <strong>~${weeklyKwhFull.toFixed(1)} kWh/semana</strong> (${dailyKwhFull.toFixed(2)} kWh/día de media).`;
+  } else {
+    info.innerHTML=`Cargando según lo consumido: ~${weeklyKwh.toFixed(1)} kWh/semana → <strong>${dailyKwh.toFixed(2)} kWh/día</strong> de media (${kwhPer100.toFixed(1)} kWh/100 km).`;
+  }
+  
+const chargesPerWeek = km / range;
+if (chargesPerWeek > 7) {
+  warn.style.display='block';
+} else if (chargesPerWeek > 4) {
+  warn.style.display='block';
+} else {
+  warn.style.display='none';
+}
+
+  
+if (chargesPerWeek > 7) {
+  warn.textContent = `Atención: necesitas cargar ~${chargesPerWeek.toFixed(1)} veces/semana (>1/día).`;
+} else if (chargesPerWeek > 4) {
+  warn.textContent = `Uso alto: ~${chargesPerWeek.toFixed(1)} cargas/semana.`;
+}
+
+}
+function handleInvoiceManual(input){
+  const val=+input.value;
+  const det=document.getElementById('invoice-detail');
+  if(val>0){
+    invoiceKwh=val/30;
+    det.style.display='block';
+    det.innerHTML=`~${invoiceKwh.toFixed(1)} kWh/día de media. Se usará como base del cálculo.`;
+  } else {
+    invoiceKwh=null;
+    det.style.display='none';
+  }
+}
+async function handleInvoice(input){
+  const file=input.files[0]; if(!file)return;
+  const ok=document.getElementById('invoice-ok'),det=document.getElementById('invoice-detail');
+  ok.style.display='block'; ok.textContent='⏳ Leyendo '+file.name+'...'; det.style.display='none';
+
+  // Read file as base64
+  const base64 = await new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=()=>rej(new Error('Error al leer el archivo'));
+    r.readAsDataURL(file);
+  });
+
+  // Determine media type
+  const ext = file.name.split('.').pop().toLowerCase();
+  const isPdf = ext==='pdf';
+  const mediaType = isPdf ? 'application/pdf' : (ext==='png' ? 'image/png' : 'image/jpeg');
+
+  try {
+    const contentItem = isPdf
+      ? { type:'document', source:{ type:'base64', media_type:mediaType, data:base64 } }
+      : { type:'image',    source:{ type:'base64', media_type:mediaType, data:base64 } };
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:300,
+        system:'Eres un extractor de datos de facturas eléctricas españolas. Responde SOLO con JSON válido, sin texto adicional ni backticks. Formato: {"kwh_mes": número, "periodo_dias": número, "kwh_dia": número, "confianza": "alta"|"media"|"baja", "nota": "texto breve"}. Si no puedes determinar el consumo, usa null en los campos numéricos.',
+        messages:[{
+          role:'user',
+          content:[
+            contentItem,
+            {type:'text', text:'Extrae el consumo total en kWh de esta factura eléctrica. Busca el campo "Energía consumida", "Consumo", "kWh" o similar. Calcula kWh/día dividiendo entre los días del periodo de facturación.'}
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.map(b=>b.text||'').join('') || '';
+    let parsed;
+    try { parsed = JSON.parse(text.replace(/```json|```/g,'').trim()); } catch(e){ parsed=null; }
+
+    if(parsed && parsed.kwh_mes){
+      invoiceKwh = parsed.kwh_dia || parsed.kwh_mes/30;
+      ok.textContent='✓ '+file.name;
+      det.style.display='block';
+      det.innerHTML=`Consumo detectado: <strong>${Math.round(parsed.kwh_mes)} kWh/mes</strong> (~${invoiceKwh.toFixed(1)} kWh/día)${parsed.periodo_dias?` · Periodo: ${parsed.periodo_dias} días`:''}. Se usará como base del cálculo.<br><span style="font-size:11px;opacity:0.8;">Confianza: ${parsed.confianza||'?'}${parsed.nota?' · '+parsed.nota:''}</span>`;
+    } else {
+      ok.textContent='⚠ No se pudo extraer el consumo de '+file.name;
+      det.style.display='block';
+      det.innerHTML=`No se encontró el consumo en la factura. Revisa que sea una factura eléctrica legible. Puedes introducir los valores manualmente.`;
+    }
+  } catch(err){
+    ok.textContent='✗ Error al procesar '+file.name;
+    det.style.display='block';
+    det.innerHTML=`Error: ${err.message}. Comprueba tu conexión e inténtalo de nuevo.`;
+  }
+}
+function getEVDailyKwh(){
+  if(!evOn)return 0;
+  const battery=+document.getElementById('ev-battery').value||60;
+  const km=+document.getElementById('ev-km').value||200;
+  const range=+document.getElementById('ev-range').value||350;
+  if(range<=0)return 0;
+  const lossFactor = 1.12;
+  return ((km/100)*((battery/range)*100)*lossFactor)/7;
+}
+function getPanelArea(wp){
+  if(wp <= 450) return 1.7;
+  if(wp <= 550) return 1.9;
+  if(wp <= 650) return 2.1;
+  if(wp <= 800) return 2.4;
+  return 2.8;
+}
+
+function calcular(){
+  const appKwh=appliances.reduce((s,a)=>s+(a.watts*a.hours)/1000,0);
+  const evKwh=getEVDailyKwh();
+
+let evDay=0, evNight=0;
+if(chargeTime==='day') evDay=evKwh;
+else evNight=evKwh;
+  const totalKwh=(invoiceKwh&&invoiceKwh>appKwh?invoiceKwh:appKwh)+evKwh;
+  const HSP=+document.getElementById("provincia").value||4.5,eff=0.80,panelWp=+document.getElementById("panel-wp").value||450;
+  
+const mode = document.querySelector('input[name="mode"]:checked').value;
+
+let targetKwh;
+
+// cálculo correcto usando consumo diurno real (incluye EV bien)
+let baseDayUse = totalKwh * DAY_RATIO;
+let realDayUse = baseDayUse + evDay;
+
+if (mode === "full") {
+  targetKwh = totalKwh;
+} else if (mode === "day") {
+  targetKwh = realDayUse;
+} else if (mode === "roi") {
+  targetKwh = realDayUse * 0.7;
+}
+
+const panelsNeeded = Math.ceil((targetKwh/(HSP*eff))*1000/panelWp);
+
+
+  // Roof limit
+  const roofM2=+document.getElementById('roof-m2').value||0;
+  const roofWarn=document.getElementById('roof-warn');
+  const panelM2 = getPanelArea(panelWp);
+  const maxPanels=roofM2>0?Math.floor(roofM2/panelM2):panelsNeeded;
+  const panels=roofM2>0?Math.min(panelsNeeded,maxPanels):panelsNeeded;
+  const roofLimited=roofM2>0&&panelsNeeded>maxPanels;
+
+  if(roofLimited){
+    roofWarn.style.display='block';
+    roofWarn.textContent=`⚠️ Con ${roofM2} m² solo caben ~${maxPanels} paneles, pero necesitas ${panelsNeeded} para cubrir tu consumo completo. La cobertura real será parcial.`;
+  } else {
+    roofWarn.style.display='none';
+  }
+
+  const installedKwp=(panels*panelWp)/1000;
+  const dailyGen=installedKwp*HSP*eff;
+
+let dayUse = (totalKwh * DAY_RATIO) + evDay;
+let nightUse = (totalKwh * (1-DAY_RATIO)) + evNight;
+const selfConsumption = Math.min(dayUse, dailyGen);
+const exported = Math.max(0, dailyGen - selfConsumption);
+const gridImport = Math.max(0, totalKwh - selfConsumption);
+
+  const cover=Math.min(100,Math.round((dailyGen/totalKwh)*100));
+
+  document.getElementById('r-panels').textContent=roofLimited?`${maxPanels} / ${panelsNeeded}`:panels;
+  document.getElementById('r-kwh').textContent=totalKwh.toFixed(2);
+  document.getElementById('r-kwp').textContent=installedKwp.toFixed(1);
+  document.getElementById('r-home').textContent=appKwh.toFixed(2);
+  document.getElementById('r-panel-wp').textContent=panelWp;
+  const mwp=document.getElementById('method-wp'); if(mwp)mwp.textContent=panelWp;
+  document.getElementById('r-cover').textContent=cover+'%';
+  document.getElementById('r-bar').style.width=cover+'%';
+
+  let bd=roofLimited
+    ?`Tu tejado permite instalar <strong>${maxPanels} paneles de ${panelWp}W</strong> (${installedKwp.toFixed(1)} kWp), que generarían ~${dailyGen.toFixed(1)} kWh/día. Para cubrir tu consumo completo necesitarías ${panelsNeeded} paneles.`
+    :`Con <strong>${panels} paneles de ${panelWp}W</strong> (${installedKwp.toFixed(1)} kWp) generarías ~${dailyGen.toFixed(1)} kWh/día.`;
+  if(evKwh>0)bd+=` El coche supone ${evKwh.toFixed(2)} kWh/día (${Math.round(evKwh/totalKwh*100)}% del total).`;
+  if(invoiceKwh&&invoiceKwh>appKwh)bd+=` Se ha usado el dato de la factura (${invoiceKwh.toFixed(1)} kWh/día) por ser mayor que la suma de aparatos.`;
+  bd+=` Estimación orientativa: el resultado real depende de ubicación, orientación, sombras y modelo de panel.`;
+  document.getElementById('r-breakdown').innerHTML=bd + `
+<br><br>
+🔋 Autoconsumo: ${selfConsumption.toFixed(2)} kWh<br>
+⚡ Red: ${gridImport.toFixed(2)} kWh<br>
+☀️ Excedente: ${exported.toFixed(2)} kWh
+`;
+  const results=document.getElementById('results');
+  results.style.display='block';
+  setTimeout(()=>results.scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+function updateHSP(){
+  const sel=document.getElementById('provincia');
+  const hsp=+sel.value||4.5;
+  const name=sel.options[sel.selectedIndex].text;
+  const info=document.getElementById('hsp-info');
+  const display=document.getElementById('hsp-display');
+  const method=document.getElementById('hsp-method');
+  if(sel.selectedIndex>0){
+    info.textContent=`HSP para ${name}: ${hsp} h/día`;
+    if(display)display.innerHTML=`HSP de ${hsp} h/día (${name})`;
+    if(method)method.textContent=hsp;
+  } else {
+    info.textContent='';
+    if(display)display.innerHTML='HSP media española de 4,5 h/día';
+    if(method)method.textContent='4,5';
+  }
+}
+renderAppliances();
+</script>
+</body>
+</html>
+ 
